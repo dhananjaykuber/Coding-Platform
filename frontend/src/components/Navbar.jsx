@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from './Button';
 import { setUser } from '../redux/userSlice';
+import Countdown from './Countdown';
 
 const Navbar = () => {
   const dispatch = useDispatch();
@@ -19,16 +20,19 @@ const Navbar = () => {
 
       {user ? (
         <div className="flex items-center justify-center">
+          <p className="mr-3">{user?.email}</p>
           <Button
             value={'Logout'}
             className={'w-fit px-5 mr-5'}
             onClick={() => {
-              localStorage.setItem('user', null);
+              localStorage.clear();
               dispatch(setUser(null));
               navigate('/login');
             }}
           />
-          <div className="text-2xl font-semibold">&#x1F550; 30:00</div>
+          {!user?.submitted && localStorage.getItem('startTest') && (
+            <Countdown />
+          )}
         </div>
       ) : (
         <div>

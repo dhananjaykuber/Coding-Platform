@@ -19,7 +19,7 @@ const Signup = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/question');
+      navigate('/');
     }
   }, [user]);
 
@@ -47,11 +47,13 @@ const Signup = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={'Email'}
+          type="email"
         />
         <Input
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder={'Password'}
+          type="password"
         />
         <Button value={'Signup'} onClick={handleSignup} loading={loading} />
 

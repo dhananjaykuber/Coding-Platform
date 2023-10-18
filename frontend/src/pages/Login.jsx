@@ -19,7 +19,7 @@ const Login = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/question');
+      navigate('/');
     }
   }, [user]);
 
@@ -35,7 +35,6 @@ const Login = () => {
 
     if (data) {
       localStorage.setItem('user', JSON.stringify(data));
-
       dispatch(setUser(data));
     }
   };
@@ -48,6 +47,7 @@ const Login = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Email"
+          type="email"
         />
         <Input
           value={password}

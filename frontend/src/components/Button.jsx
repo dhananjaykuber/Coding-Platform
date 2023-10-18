@@ -7,7 +7,9 @@ const Button = ({ value, onClick, loading, className }) => {
       onClick={onClick}
       disabled={loading}
       className={twMerge(
-        `bg-gray-800 text-gray-200 p-2 rounded-md w-full ${className}`
+        `bg-gray-800 text-gray-200 p-2 rounded-md w-full ${className} ${
+          loading && 'opacity-60'
+        }`
       )}
     >
       {loading ? 'Loading...' : value}
