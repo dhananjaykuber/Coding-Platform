@@ -1,26 +1,105 @@
 const Code = require('../models/Code');
+var compiler = require('compilex');
+const runCodeWithInput = require('../utils/runCode');
+const submitCodeWithInput = require('../utils/submitCode');
+const User = require('../models/User');
+
+var options = { stats: true };
+compiler.init(options);
 
 const submitCode = async (req, res) => {
-  const { language, question } = req.body;
+  const { code, language, id } = req.body;
 
-  console.log(req.body);
-
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
-
-    await Code.create({
+  if (language === 'cpp') {
+    var envData = { OS: 'windows', cmd: 'g++', options: { timeout: 5000 } };
+    submitCodeWithInput(
+      req,
+      res,
+      envData,
+      code,
       language,
-      path: req.file.path,
-      author: req.user._id,
-      question: question,
-    });
-
-    res.status(200).json({ message: 'Code saved to servver' });
-  } catch (error) {
-    res.status(500).json({ error: 'File upload failed' });
+      id,
+      compiler.compileCPPWithInput
+    );
+  } else if (language === 'python') {
+    var envData = { OS: 'windows', options: { timeout: 5000 } };
+    submitCodeWithInput(
+      req,
+      res,
+      envData,
+      code,
+      language,
+      id,
+      compiler.compilePythonWithInput
+    );
+  } else if (language === 'java') {
+    var envData = { OS: 'windows', options: { timeout: 5000 } };
+    submitCodeWithInput(
+      req,
+      res,
+      envData,
+      code,
+      language,
+      id,
+      compiler.compileJavaWithInput
+    );
   }
 };
 
-module.exports = { submitCode };
+const runCode = async (req, res) => {
+  const { code, language, id } = req.body;
+
+  if (language === 'cpp') {
+    var envData = { OS: 'windows', cmd: 'g++', options: { timeout: 5000 } };
+    runCodeWithInput(
+      req,
+      res,
+      envData,
+      code,
+      language,
+      id,
+      compiler.compileCPPWithInput
+    );
+  } else if (language === 'python') {
+    var envData = { OS: 'windows', options: { timeout: 5000 } };
+    runCodeWithInput(
+      req,
+      res,
+      envData,
+      code,
+      language,
+      id,
+      compiler.compilePythonWithInput
+    );
+  } else if (language === 'java') {
+    var envData = { OS: 'windows', options: { timeout: 5000 } };
+    runCodeWithInput(
+      req,
+      res,
+      envData,
+      code,
+      language,
+      id,
+      compiler.compileJavaWithInput
+    );
+  }
+};
+
+const endTest = async (req, res) => {
+  const { endedAt } = req.body;
+
+  try {
+    await User.findByIdAndUpdate(
+      { _id: req.user._id },
+      { submitted: true, endedAt: endedAt }
+    );
+
+    res.status(200).json({ message: 'Test submitted successfully.' });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Error occured while submitting the test. Please try again.',
+    });
+  }
+};
+
+module.exports = { submitCode, runCode, endTest };

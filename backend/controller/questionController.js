@@ -3,6 +3,12 @@ const Question = require('../models/Question');
 
 const getQuestions = async (req, res) => {
   try {
+    if (req.user.submitted) {
+      return res
+        .status(400)
+        .json({ error: 'You have already submitted the test.' });
+    }
+
     const questions = await Question.find();
 
     const questionsWithStatus = [];
@@ -11,6 +17,7 @@ const getQuestions = async (req, res) => {
       const userHasSubmitted = await Code.findOne({
         author: req.user._id,
         question: question._id,
+        runCount: { $lt: 5 },
       });
 
       questionsWithStatus.push({
@@ -32,12 +39,17 @@ const getQuestion = async (req, res) => {
   const { id } = req.params;
 
   try {
+    if (req.user.submitted) {
+      return res
+        .status(400)
+        .json({ error: 'You have already submitted the test.' });
+    }
+
     const alreadySubmitted = await Code.findOne({
       author: req.user._id.toString(),
       question: id,
+      submitted: true,
     });
-
-    console.log(alreadySubmitted);
 
     if (alreadySubmitted) {
       return res
@@ -54,10 +66,16 @@ const getQuestion = async (req, res) => {
 };
 
 const addQuestion = async (req, res) => {
-  const { title, description, number } = req.body;
+  const { number, title, description, template, testCases } = req.body;
 
   try {
-    const question = await Question.create({ title, description, number });
+    const question = await Question.create({
+      number,
+      title,
+      description,
+      template,
+      testCases,
+    });
 
     res.status(200).json(question);
   } catch (error) {

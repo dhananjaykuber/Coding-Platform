@@ -26,6 +26,7 @@ const signup = async (req, res) => {
       _id: user._id,
       email: user.email,
       token,
+      submitted: user.submitted,
     });
   } catch (error) {
     res.status(500).json({ error: 'Cannot create user. Try again later.' });
@@ -49,6 +50,7 @@ const login = async (req, res) => {
           _id: user._id,
           email: user.email,
           token,
+          submitted: user.submitted,
         });
       }
     }

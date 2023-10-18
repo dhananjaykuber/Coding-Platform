@@ -8,7 +8,7 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-router.post('/', auth, addQuestion);
+router.post('/', addQuestion);
 router.get('/', auth, getQuestions);
 router.get('/:id', auth, getQuestion);
 

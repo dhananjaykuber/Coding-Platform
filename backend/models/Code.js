@@ -7,6 +7,21 @@ const codeSchema = new mongoose.Schema({
   path: {
     type: String,
   },
+  code: {
+    type: String,
+  },
+  submitted: {
+    type: Boolean,
+    default: false,
+  },
+  passedTests: {
+    type: Number,
+    default: Boolean,
+  },
+  runCount: {
+    type: Number,
+    default: 0,
+  },
   author: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -14,6 +29,9 @@ const codeSchema = new mongoose.Schema({
   question: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Question',
+  },
+  executionTime: {
+    type: String,
   },
 });
 

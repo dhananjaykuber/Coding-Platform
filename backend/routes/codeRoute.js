@@ -1,10 +1,15 @@
 const express = require('express');
-const upload = require('../utils/fileUploader');
 const auth = require('../middleware/auth');
-const { submitCode } = require('../controller/codeController');
+const {
+  submitCode,
+  runCode,
+  endTest,
+} = require('../controller/codeController');
 
 const router = express.Router();
 
-router.post('/submit', auth, upload.single('codeFile'), submitCode);
+router.post('/submit', auth, submitCode);
+router.post('/run', auth, runCode);
+router.post('/end', auth, endTest);
 
 module.exports = router;
