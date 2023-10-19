@@ -5,14 +5,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import Button from '../components/Button';
 import Editor from '@monaco-editor/react';
 import axios from 'axios';
-
-const languages = ['CPP', 'Java', 'Python', 'Solidity'];
-const extensions = {
-  CPP: 'cpp',
-  Java: 'java',
-  Python: 'py',
-  Solidity: 'sol',
-};
+import { error, success } from '../utils/toasts';
 
 const Question = () => {
   const navigate = useNavigate();
@@ -25,7 +18,8 @@ const Question = () => {
 
   const [question, setQuestion] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState(languages[0]);
+  const [languages, setLanguages] = useState([]);
+  const [selectedLanguage, setSelectedLanguage] = useState('');
   const [output, setOutput] = useState('');
   const [outputError, setOutputError] = useState('');
   const [runLoading, setRunLoading] = useState(false);
@@ -45,7 +39,10 @@ const Question = () => {
     }
 
     if (!getLoading && !getError) {
+      setLanguages(Object.keys(data.template));
+      setSelectedLanguage(Object.keys(data.template)[0]);
       setQuestion(data);
+      console.log(data);
     }
   }, [data, getLoading, getError]);
 
@@ -145,8 +142,20 @@ const Question = () => {
               className={'w-fit bg-green-700 ml-5 px-5'}
             />
 
-            <h6 className="mt-10 text-base font-bold mb-2">Output</h6>
-            <div className="bg-neutral-900 min-h-[200px] p-4 rounded-md">
+            <h6 className="mt-5 text-base font-bold mb-2">Test Cases</h6>
+            <div className="bg-neutral-800 p-3 rounded-md text-white">
+              <div className="flex gap-3 text-sm mb-1">
+                <span>Input: </span>
+                <div>{question?.testCases[selectedLanguage][0].input}</div>
+              </div>
+              <div className="flex gap-3 text-sm">
+                <span>Output: </span>
+                <div>{question?.testCases[selectedLanguage][0].output}</div>
+              </div>
+            </div>
+
+            <h6 className="mt-5 text-base font-bold mb-2">Output</h6>
+            <div className="bg-neutral-800 min-h-[200px] p-4 rounded-md overflow-hidden">
               {outputError && (
                 <p className="text-sm text-red-500">{outputError}</p>
               )}
@@ -170,10 +179,9 @@ const Question = () => {
               ))}
             </select>
             <Editor
-              height="86vh"
+              height="85vh"
               theme="vs-dark"
               onMount={handleEditorDidMount}
-              path={'program'}
               defaultLanguage={selectedLanguage.toLocaleLowerCase()}
               value={question?.template[selectedLanguage.toLocaleLowerCase()]}
             />

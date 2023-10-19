@@ -14,7 +14,11 @@ const Navbar = () => {
     <div className="flex items-center justify-between border-b p-4">
       <div>
         <Link to={'/'} className="text-2xl font-bold">
-          Coding Platform
+          <img
+            className="w-[120px]"
+            src="/studentconnect-logo-light.svg"
+            alt="Student Connect Logo"
+          />
         </Link>
       </div>
 
@@ -32,6 +36,15 @@ const Navbar = () => {
           />
           {!user?.submitted && localStorage.getItem('startTest') && (
             <Countdown />
+          )}
+
+          {user?.isAdmin && (
+            <Link
+              to="/admin"
+              className="bg-gray-800 text-gray-200 p-2 rounded-md px-5 ml-0"
+            >
+              Dashboard
+            </Link>
           )}
         </div>
       ) : (
