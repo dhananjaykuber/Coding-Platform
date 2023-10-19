@@ -58,7 +58,7 @@ const submitCodeWithInput = async (
         await Code.findOneAndUpdate(
           { _id: alreadyOpted._id },
           {
-            executionTime: executionTime.toString(),
+            executionTime: executionTime,
             language: language,
             code: code,
             passedTests: (passedTestCases / testCasesCount) * 100,
@@ -69,7 +69,8 @@ const submitCodeWithInput = async (
         await Code.findOneAndUpdate(
           { _id: alreadyOpted._id },
           {
-            executionTime: executionTime.toString(),
+            $inc: { runCount: 1 },
+            executionTime: executionTime,
             language: language,
             code: code,
             passedTests: (passedTestCases / testCasesCount) * 100,
@@ -83,7 +84,7 @@ const submitCodeWithInput = async (
         author: req.user._id,
         question: id,
         runCount: 1,
-        executionTime: executionTime.toString(),
+        executionTime: executionTime,
         code: code,
         passedTests: (passedTestCases / testCasesCount) * 100,
         submitted: true,
@@ -94,7 +95,6 @@ const submitCodeWithInput = async (
       message: `Code submitted successfully.`,
     });
   } catch (err) {
-    console.log(err);
     res
       .status(500)
       .send({ error: 'Could not submit the code, Please try again.' });

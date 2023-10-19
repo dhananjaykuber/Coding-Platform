@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const Code = require('../models/Code');
 const Question = require('../models/Question');
 const User = require('../models/User');
@@ -87,13 +88,94 @@ const calculateResults = async (req, res) => {
     if (!req.user.isAdmin) {
       return res.status(401).json({ error: 'Unauthorized.' });
     }
+
+    const users = await User.find({ submitted: true });
+
+    // create array of promises for each user
+    const userPromises = users.map(async (user) => {
+      const userId = user._id;
+
+      // total solved questions count
+      const totalSolved = await Code.countDocuments({ author: userId });
+
+      // total passed test cases of all solved questions
+      const passedTests = await Code.aggregate([
+        {
+          $match: {
+            author: new mongoose.Types.ObjectId(userId),
+            passedTests: { $gt: 0 },
+          },
+        },
+        {
+          $group: { _id: null, passedTests: { $sum: '$passedTests' } },
+        },
+      ]);
+      const totalPassedTests = passedTests[0] ? passedTests[0].passedTests : 0;
+
+      // total execution time and run counts of all solved questions
+      const executionTimeAndRunCount = await Code.aggregate([
+        {
+          $match: { author: new mongoose.Types.ObjectId(userId) },
+        },
+        {
+          $group: {
+            _id: null,
+            totalExecutionTime: { $sum: '$executionTime' },
+            totalRunCount: { $sum: '$runCount' },
+          },
+        },
+      ]);
+      const totalRunCount = executionTimeAndRunCount[0]
+        ? executionTimeAndRunCount[0].totalRunCount
+        : 0;
+      const totalExecutionTime = executionTimeAndRunCount[0]
+        ? parseFloat(executionTimeAndRunCount[0].totalExecutionTime).toFixed(3)
+        : 0;
+
+      return {
+        email: user.email,
+        submitted: user.submitted,
+        totalSolved: totalSolved,
+        totalPassedTests: totalPassedTests,
+        totalExecutionTime: parseFloat(totalExecutionTime),
+        totalRunCount: totalRunCount,
+        endedAt: user.endedAt,
+      };
+    });
+
+    const userData = await Promise.all(userPromises);
+
+    userData.sort((a, b) => {
+      // Sort by totalSolved (decreasing)
+      if (b.totalSolved - a.totalSolved !== 0) {
+        return b.totalSolved - a.totalSolved;
+      }
+
+      // Sort by totalPassedTests (decreasing)
+      if (b.totalPassedTests - a.totalPassedTests !== 0) {
+        return b.totalPassedTests - a.totalPassedTests;
+      }
+
+      // Sort by runCount (increasing)
+      if (a.totalRunCount - b.totalRunCount !== 0) {
+        return a.totalRunCount - b.totalRunCount;
+      }
+
+      // Sort by executionTime (increasing)
+      if (a.totalExecutionTime - b.totalExecutionTime !== 0) {
+        return a.totalExecutionTime - b.totalExecutionTime;
+      }
+
+      // Sort by time to complete (decreasing)
+      return b.endedAt - a.endedAt;
+    });
+
+    res.status(200).json(userData);
   } catch (error) {
     res
       .status(500)
       .json({ error: 'An error occurred while calculating result.' });
   }
-
-  res.status(200).json({ message: 'Calculate result.' });
 };
 
 module.exports = {

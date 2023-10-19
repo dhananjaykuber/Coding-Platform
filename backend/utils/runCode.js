@@ -66,7 +66,7 @@ const runCodeWithInput = async (
         { _id: alreadyOpted._id },
         {
           $inc: { runCount: 1 },
-          executionTime: executionTime.toString(),
+          executionTime: executionTime,
           passedTests: (passedTestCases / testCasesCount) * 100,
           code: code,
         }
@@ -78,7 +78,7 @@ const runCodeWithInput = async (
         question: id,
         runCount: 1,
         passedTests: (passedTestCases / testCasesCount) * 100,
-        executionTime: executionTime.toString(),
+        executionTime: executionTime,
         code: code,
       });
     }
@@ -95,7 +95,6 @@ const runCodeWithInput = async (
       } remaning.`,
     });
   } catch (err) {
-    console.log(err);
     res
       .status(500)
       .send({ error: 'Could not run the code, Please try again.' });

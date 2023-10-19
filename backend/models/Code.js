@@ -33,7 +33,7 @@ const codeSchema = new mongoose.Schema({
     ref: 'Question',
   },
   executionTime: {
-    type: String,
+    type: mongoose.Schema.Types.Decimal128,
   },
 });
 
