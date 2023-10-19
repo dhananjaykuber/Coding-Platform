@@ -6,6 +6,7 @@ const cors = require('cors');
 const userRoute = require('./routes/userRoute');
 const codeRoute = require('./routes/codeRoute');
 const questionRoute = require('./routes/questionRoute');
+const adminRoute = require('./routes/adminRoute');
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use('/api/auth', userRoute);
 app.use('/api/code', codeRoute);
 app.use('/api/question', questionRoute);
+app.use('/api/admin', adminRoute);
 
 mongoose
   .connect(process.env.DATABASE_URI)

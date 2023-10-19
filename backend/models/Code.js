@@ -1,3 +1,5 @@
+// for submissions
+
 const mongoose = require('mongoose');
 
 const codeSchema = new mongoose.Schema({

@@ -27,6 +27,7 @@ const signup = async (req, res) => {
       email: user.email,
       token,
       submitted: user.submitted,
+      isAdmin: user.isAdmin,
     });
   } catch (error) {
     res.status(500).json({ error: 'Cannot create user. Try again later.' });
@@ -51,6 +52,7 @@ const login = async (req, res) => {
           email: user.email,
           token,
           submitted: user.submitted,
+          isAdmin: user.isAdmin,
         });
       }
     }
