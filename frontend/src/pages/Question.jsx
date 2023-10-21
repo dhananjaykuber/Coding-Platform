@@ -5,7 +5,6 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import Button from '../components/Button';
 import Editor from '@monaco-editor/react';
 import axios from 'axios';
-import Countdown from '../components/Countdown';
 import { setShowTimer, setTestId } from '../redux/countdownSlice';
 
 const Question = () => {
@@ -63,6 +62,7 @@ const Question = () => {
           code: textareaRef.current.getValue(),
           language: selectedLanguage.toLocaleLowerCase(),
           id: id,
+          testId: testId,
         },
         {
           headers: {
@@ -90,6 +90,7 @@ const Question = () => {
           code: textareaRef.current.getValue(),
           language: selectedLanguage.toLocaleLowerCase(),
           id: id,
+          testId: testId,
         },
         {
           headers: {
