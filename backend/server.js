@@ -7,6 +7,7 @@ const userRoute = require('./routes/userRoute');
 const codeRoute = require('./routes/codeRoute');
 const questionRoute = require('./routes/questionRoute');
 const adminRoute = require('./routes/adminRoute');
+const testRoute = require('./routes/testRoute');
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use('/api/auth', userRoute);
 app.use('/api/code', codeRoute);
 app.use('/api/question', questionRoute);
 app.use('/api/admin', adminRoute);
+app.use('/api/test', testRoute);
 
 mongoose
   .connect(process.env.DATABASE_URI)

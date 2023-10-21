@@ -1,6 +1,5 @@
 const express = require('express');
 const {
-  addQuestion,
   getQuestion,
   getQuestions,
 } = require('../controller/questionController');
@@ -8,8 +7,7 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-router.post('/', addQuestion);
-router.get('/', auth, getQuestions);
-router.get('/:id', auth, getQuestion);
+router.get('/:testId', auth, getQuestions);
+router.get('/test/:questionId', auth, getQuestion);
 
 module.exports = router;

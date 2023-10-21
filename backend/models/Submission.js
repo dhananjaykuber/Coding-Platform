@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose');
 
-const codeSchema = new mongoose.Schema({
+const submissionSchema = new mongoose.Schema({
   language: {
     type: String,
   },
@@ -37,4 +37,4 @@ const codeSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Code', codeSchema);
+module.exports = mongoose.model('Submission', submissionSchema);

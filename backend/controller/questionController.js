@@ -1,30 +1,54 @@
-const Code = require('../models/Code');
+const Submission = require('../models/Submission');
 const Question = require('../models/Question');
+const Test = require('../models/Test');
+const TestCompletion = require('../models/TestCompletion');
 
 const getQuestions = async (req, res) => {
+  const { testId } = req.params;
+
   try {
-    if (req.user.submitted) {
+    // checl test is live or not
+    const test = await Test.findById(testId);
+
+    if (!test.isLive) {
+      return res.status(400).json({ error: 'Test is not live yet.' });
+    }
+
+    // check user has started the test (has entry in test completion collection)
+    const testCompletion = await TestCompletion.findOne({
+      test: testId,
+      user: req.user._id,
+    });
+
+    if (!testCompletion) {
+      return res
+        .status(400)
+        .json({ error: 'You have not registered for this test' });
+    }
+
+    // check user has already submitted the test
+    if (testCompletion.submitted) {
       return res
         .status(400)
         .json({ error: 'You have already submitted the test.' });
     }
 
-    const questions = await Question.find();
+    // else send the questions of test
+    const questions = await Question.find({ test: testId });
 
     const questionsWithStatus = [];
 
     for (const question of questions) {
-      const userHasSubmitted = await Code.findOne({
+      const userHasSubmitted = await Submission.findOne({
         author: req.user._id,
         question: question._id,
-        runCount: { $lt: 5 },
       });
 
       questionsWithStatus.push({
         _id: question._id,
         title: question.title,
         description: question.description,
-        submitted: userHasSubmitted ? true : false,
+        submitted: userHasSubmitted?.submitted ? true : false,
         number: question.number,
       });
     }
@@ -36,7 +60,7 @@ const getQuestions = async (req, res) => {
 };
 
 const getQuestion = async (req, res) => {
-  const { id } = req.params;
+  const { questionId } = req.params;
 
   try {
     if (req.user.submitted) {
@@ -45,9 +69,9 @@ const getQuestion = async (req, res) => {
         .json({ error: 'You have already submitted the test.' });
     }
 
-    const alreadySubmitted = await Code.findOne({
+    const alreadySubmitted = await Submission.findOne({
       author: req.user._id.toString(),
-      question: id,
+      question: questionId,
       submitted: true,
     });
 
@@ -57,7 +81,7 @@ const getQuestion = async (req, res) => {
         .json({ error: 'You have already submitted the code.' });
     }
 
-    const question = await Question.findById(id);
+    const question = await Question.findById(questionId);
 
     res.status(200).json(question);
   } catch (error) {
@@ -65,22 +89,4 @@ const getQuestion = async (req, res) => {
   }
 };
 
-const addQuestion = async (req, res) => {
-  const { number, title, description, template, testCases } = req.body;
-
-  try {
-    const question = await Question.create({
-      number,
-      title,
-      description,
-      template,
-      testCases,
-    });
-
-    res.status(200).json(question);
-  } catch (error) {
-    res.status(500).json({ error: 'Cannot create question.' });
-  }
-};
-
-module.exports = { getQuestions, getQuestion, addQuestion };
+module.exports = { getQuestions, getQuestion };

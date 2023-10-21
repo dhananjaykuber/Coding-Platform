@@ -8,13 +8,6 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
   },
-  submitted: {
-    type: Boolean,
-    default: false,
-  },
-  endedAt: {
-    type: String,
-  },
   isAdmin: {
     type: Boolean,
     default: false,

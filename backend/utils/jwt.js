@@ -15,9 +15,12 @@ const generateToken = (id) => {
 };
 
 const verifyToken = (token) => {
-  const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
-
-  return decoded;
+  try {
+    const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+    return decoded;
+  } catch (error) {
+    return error;
+  }
 };
 
 module.exports = { generateToken, verifyToken };

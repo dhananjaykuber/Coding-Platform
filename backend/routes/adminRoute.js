@@ -5,15 +5,26 @@ const {
   resetTest,
   getQuestions,
   calculateResults,
+  createTest,
+  updateTest,
+  getTests,
+  addQuestion,
 } = require('../controller/adminController');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
 
 router.get('/users', auth, getUsers);
-router.get('/questions', auth, getQuestions);
-router.get('/results', auth, calculateResults);
 router.put('/update-password', auth, editUserPassword);
+
+router.get('/questions', auth, getQuestions);
+router.post('/questions', auth, addQuestion);
+
+router.get('/results', auth, calculateResults);
+
+router.get('/test', auth, getTests);
+router.post('/test', auth, createTest);
+router.put('/test/:id', auth, updateTest);
 router.put('/reset-test', auth, resetTest);
 
 module.exports = router;

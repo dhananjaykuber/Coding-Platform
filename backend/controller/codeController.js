@@ -1,11 +1,14 @@
-const Code = require('../models/Code');
-var compiler = require('compilex');
+const compiler = require('compilex');
 const runCodeWithInput = require('../utils/runCode');
 const submitCodeWithInput = require('../utils/submitCode');
 const User = require('../models/User');
 
-var options = { stats: true };
+const options = { stats: true };
 compiler.init(options);
+
+compiler.flush(function () {
+  console.log('All temporary files flushed 🚮');
+});
 
 const submitCode = async (req, res) => {
   const { code, language, id } = req.body;

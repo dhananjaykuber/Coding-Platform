@@ -1,4 +1,4 @@
-const Code = require('../models/Code');
+const Submission = require('../models/Submission');
 const Question = require('../models/Question');
 const { RUN_COUNT } = require('./constant');
 
@@ -12,7 +12,7 @@ const submitCodeWithInput = async (
   compilerFn
 ) => {
   try {
-    const alreadyOpted = await Code.findOne({
+    const alreadyOpted = await Submission.findOne({
       author: req.user._id.toString(),
       question: id,
     });
@@ -55,7 +55,7 @@ const submitCodeWithInput = async (
 
     if (alreadyOpted) {
       if (alreadyOpted.runCount >= RUN_COUNT) {
-        await Code.findOneAndUpdate(
+        await Submission.findOneAndUpdate(
           { _id: alreadyOpted._id },
           {
             executionTime: executionTime,
@@ -66,7 +66,7 @@ const submitCodeWithInput = async (
           }
         );
       } else {
-        await Code.findOneAndUpdate(
+        await Submission.findOneAndUpdate(
           { _id: alreadyOpted._id },
           {
             $inc: { runCount: 1 },
@@ -79,7 +79,7 @@ const submitCodeWithInput = async (
         );
       }
     } else {
-      await Code.create({
+      await Submission.create({
         language,
         author: req.user._id,
         question: id,

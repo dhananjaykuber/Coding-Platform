@@ -1,8 +1,8 @@
-const { default: mongoose } = require('mongoose');
-const Code = require('../models/Code');
+const Submission = require('../models/Submission');
 const Question = require('../models/Question');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const Test = require('../models/Test');
 
 const getUsers = async (req, res) => {
   try {
@@ -57,7 +57,7 @@ const resetTest = async (req, res) => {
     });
 
     // delete all submissions of users
-    await Code.deleteMany({ author: id });
+    await Submission.deleteMany({ author: id });
 
     res
       .status(200)
@@ -96,10 +96,10 @@ const calculateResults = async (req, res) => {
       const userId = user._id;
 
       // total solved questions count
-      const totalSolved = await Code.countDocuments({ author: userId });
+      const totalSolved = await Submission.countDocuments({ author: userId });
 
       // total passed test cases of all solved questions
-      const passedTests = await Code.aggregate([
+      const passedTests = await Submission.aggregate([
         {
           $match: {
             author: new mongoose.Types.ObjectId(userId),
@@ -113,7 +113,7 @@ const calculateResults = async (req, res) => {
       const totalPassedTests = passedTests[0] ? passedTests[0].passedTests : 0;
 
       // total execution time and run counts of all solved questions
-      const executionTimeAndRunCount = await Code.aggregate([
+      const executionTimeAndRunCount = await Submission.aggregate([
         {
           $match: { author: new mongoose.Types.ObjectId(userId) },
         },
@@ -178,10 +178,88 @@ const calculateResults = async (req, res) => {
   }
 };
 
+const createTest = async (req, res) => {
+  const { title, description, time } = req.body;
+
+  try {
+    if (!req.user.isAdmin) {
+      return res.status(401).json({ error: 'Unauthorized.' });
+    }
+
+    const test = await Test.create({
+      title,
+      description,
+      time,
+      creator: req.user._id,
+    });
+
+    res.status(200).json(test);
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while creating test.' });
+  }
+};
+
+const getTests = async (req, res) => {
+  try {
+    if (!req.user.isAdmin) {
+      return res.status(401).json({ error: 'Unauthorized.' });
+    }
+
+    const tests = await Test.find({ creator: req.user._id });
+
+    res.status(200).json(tests);
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while getting tests.' });
+  }
+};
+
+const updateTest = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    if (!req.user.isAdmin) {
+      return res.status(401).json({ error: 'Unauthorized.' });
+    }
+
+    const test = await Test.findByIdAndUpdate(id, { ...req.body });
+
+    res.status(200).json(test);
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while creating test.' });
+  }
+};
+
+const addQuestion = async (req, res) => {
+  const { number, title, description, template, testCases, testId } = req.body;
+
+  try {
+    if (!req.user.isAdmin) {
+      return res.status(401).json({ error: 'Unauthorized.' });
+    }
+
+    const question = await Question.create({
+      number,
+      title,
+      description,
+      template,
+      testCases,
+      test: testId,
+    });
+
+    res.status(200).json(question);
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while adding question.' });
+  }
+};
+
 module.exports = {
   getUsers,
   editUserPassword,
   resetTest,
   getQuestions,
   calculateResults,
+  createTest,
+  updateTest,
+  getTests,
+  addQuestion,
 };

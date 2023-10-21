@@ -10,7 +10,18 @@ module.exports = async (req, res, next) => {
 
   const token = authorization.split(' ')[1];
 
-  const decoded = await verifyToken(token);
+  if (!token) {
+    return res.status(400).json({ error: 'Authorization token required' });
+  }
+
+  let decoded;
+  try {
+    decoded = await verifyToken(token);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: 'Authorization failed. Please try again later.' });
+  }
 
   try {
     const user = await User.findById(decoded._id);
@@ -18,11 +29,15 @@ module.exports = async (req, res, next) => {
     if (user) {
       req.user = user;
     } else {
-      return res.status(400).json({ error: error.message });
+      return res
+        .status(400)
+        .json({ error: 'Authorization failed. Please try again later.' });
     }
 
     next();
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res
+      .status(400)
+      .json({ error: 'Authorization failed. Please try again later.' });
   }
 };
