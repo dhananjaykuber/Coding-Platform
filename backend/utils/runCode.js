@@ -9,6 +9,7 @@ const runCodeWithInput = async (
   code,
   language,
   id,
+  testId,
   compilerFn
 ) => {
   try {
@@ -80,6 +81,7 @@ const runCodeWithInput = async (
         passedTests: (passedTestCases / testCasesCount) * 100,
         executionTime: executionTime,
         code: code,
+        testId: testId,
       });
     }
 

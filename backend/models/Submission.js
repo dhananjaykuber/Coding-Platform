@@ -32,6 +32,10 @@ const submissionSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Question',
   },
+  testId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Test',
+  },
   executionTime: {
     type: mongoose.Schema.Types.Decimal128,
   },

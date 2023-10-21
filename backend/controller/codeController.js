@@ -11,7 +11,7 @@ compiler.flush(function () {
 });
 
 const submitCode = async (req, res) => {
-  const { code, language, id } = req.body;
+  const { code, language, id, testId } = req.body;
 
   if (language === 'cpp') {
     var envData = { OS: 'windows', cmd: 'g++', options: { timeout: 5000 } };
@@ -22,6 +22,7 @@ const submitCode = async (req, res) => {
       code,
       language,
       id,
+      testId,
       compiler.compileCPPWithInput
     );
   } else if (language === 'python') {
@@ -33,6 +34,7 @@ const submitCode = async (req, res) => {
       code,
       language,
       id,
+      testId,
       compiler.compilePythonWithInput
     );
   } else if (language === 'java') {
@@ -44,13 +46,14 @@ const submitCode = async (req, res) => {
       code,
       language,
       id,
+      testId,
       compiler.compileJavaWithInput
     );
   }
 };
 
 const runCode = async (req, res) => {
-  const { code, language, id } = req.body;
+  const { code, language, id, testId } = req.body;
 
   if (language === 'cpp') {
     var envData = { OS: 'windows', cmd: 'g++', options: { timeout: 5000 } };
@@ -61,6 +64,7 @@ const runCode = async (req, res) => {
       code,
       language,
       id,
+      testId,
       compiler.compileCPPWithInput
     );
   } else if (language === 'python') {
@@ -72,6 +76,7 @@ const runCode = async (req, res) => {
       code,
       language,
       id,
+      testId,
       compiler.compilePythonWithInput
     );
   } else if (language === 'java') {
@@ -83,6 +88,7 @@ const runCode = async (req, res) => {
       code,
       language,
       id,
+      testId,
       compiler.compileJavaWithInput
     );
   }

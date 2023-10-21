@@ -9,6 +9,7 @@ const submitCodeWithInput = async (
   code,
   language,
   id,
+  testId,
   compilerFn
 ) => {
   try {
@@ -88,6 +89,7 @@ const submitCodeWithInput = async (
         code: code,
         passedTests: (passedTestCases / testCasesCount) * 100,
         submitted: true,
+        testId: testId,
       });
     }
 
