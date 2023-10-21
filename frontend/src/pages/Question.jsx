@@ -1,16 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import getAPIData from '../hooks/getAPIData';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Button from '../components/Button';
 import Editor from '@monaco-editor/react';
 import axios from 'axios';
-import { error, success } from '../utils/toasts';
+import Countdown from '../components/Countdown';
+import { setShowTimer, setTestId } from '../redux/countdownSlice';
 
 const Question = () => {
+  const dispatch = useDispatch();
+
   const navigate = useNavigate();
 
-  const { id } = useParams();
+  const { id, testId } = useParams();
 
   const { user } = useSelector((store) => store.user);
 
@@ -25,7 +28,7 @@ const Question = () => {
   const [runLoading, setRunLoading] = useState(false);
 
   const { data, getLoading, getError } = getAPIData(
-    `${import.meta.env.VITE_NODE_API}/question/${id}`,
+    `${import.meta.env.VITE_NODE_API}/question/test/${id}`,
     {
       headers: {
         Authorization: `Bearer ${user?.token}`,
@@ -41,8 +44,11 @@ const Question = () => {
     if (!getLoading && !getError) {
       setLanguages(Object.keys(data.template));
       setSelectedLanguage(Object.keys(data.template)[0]);
+
       setQuestion(data);
-      console.log(data);
+
+      dispatch(setShowTimer(true));
+      dispatch(setTestId(testId));
     }
   }, [data, getLoading, getError]);
 
@@ -92,7 +98,7 @@ const Question = () => {
         }
       );
       console.log(res.data.message);
-      navigate('/question');
+      navigate(`/test/${testId}/questions`);
     } catch (error) {
       setOutputError(error.response.data.error);
       console.log(error.response.data.error);
@@ -110,7 +116,10 @@ const Question = () => {
       <div className="min-h-[70vh] flex items-center justify-center">
         <p className="text-red-600 font-semibold text-sm">
           {getError}{' '}
-          <Link to="/question" className="text-blue-600 font-medium underline">
+          <Link
+            to={`/test/${testId}/questions`}
+            className="text-blue-600 font-medium underline"
+          >
             Click here to solve other questions.
           </Link>
         </p>

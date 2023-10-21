@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   allUsers: null,
   results: null,
+  tests: [],
 };
 
 const adminSlice = createSlice({
@@ -24,9 +25,31 @@ const adminSlice = createSlice({
     setResults: (state, action) => {
       state.results = action.payload;
     },
+    setTests: (state, action) => {
+      state.tests = action.payload;
+    },
+    addTest: (state, action) => {
+      state.tests.push(action.payload);
+    },
+    updateTestStatus: (state, action) => {
+      const { id, isLive } = action.payload;
+
+      const testToUpdate = state.tests.find((test) => test._id === id);
+
+      if (testToUpdate) {
+        testToUpdate.isLive = isLive;
+      }
+    },
   },
 });
 
-export const { setAllUsers, updateUser, setResults } = adminSlice.actions;
+export const {
+  setAllUsers,
+  updateUser,
+  setResults,
+  addTest,
+  setTests,
+  updateTestStatus,
+} = adminSlice.actions;
 
 export default adminSlice.reducer;

@@ -1,73 +1,173 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { error } from '../utils/toasts';
 import { twMerge } from 'tailwind-merge';
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
-import { setUser } from '../redux/userSlice';
 import { useNavigate } from 'react-router-dom';
+import {
+  setCountdownToNull,
+  setSeconds,
+  setTime,
+} from '../redux/countdownSlice';
 
-export let countdown = null;
-
-const Countdown = () => {
+const Countdown = ({ testId }) => {
   const { user } = useSelector((store) => store.user);
+  const { minutes, seconds } = useSelector((store) => store.countdown);
 
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
 
-  const initialMinutes = parseInt(localStorage.getItem('minutes')) || 60;
-  const initialSeconds = parseInt(localStorage.getItem('seconds')) || 0;
+  const updateRemaningTime = async () => {
+    const localStorageTime = localStorage.getItem(testId);
+    const { minutes, seconds } = JSON.parse(localStorageTime);
 
-  const [minutes, setMinutes] = useState(initialMinutes);
-  const [seconds, setSeconds] = useState(initialSeconds);
+    try {
+      const res = await axios.put(
+        `${import.meta.env.VITE_NODE_API}/test/update-time/${testId}`,
+        {
+          time: `${minutes}:${seconds}`,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        }
+      );
+
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getRemaningTime = async () => {
+    // check that test remaning time is present in localstorage
+    const localStorageTime = localStorage.getItem(testId);
+
+    // if not present then fetch it from server
+    if (localStorageTime == null) {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_NODE_API}/test/remaning-time/${testId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user?.token}`,
+            },
+          }
+        );
+
+        console.log('Remaining time: ', res.data);
+
+        const [min, sec] = res.data.remaningTime.split(':');
+
+        // get the time and set it to local storage
+        localStorage.setItem(
+          testId,
+          JSON.stringify({
+            minutes: min,
+            seconds: sec,
+          })
+        );
+
+        dispatch(setTime({ minutes: min, seconds: sec }));
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      const { minutes, seconds } = JSON.parse(localStorageTime);
+
+      dispatch(setTime({ minutes, seconds }));
+    }
+  };
 
   useEffect(() => {
-    countdown = setInterval(() => {
-      if (minutes === 0 && seconds === 0) {
+    getRemaningTime();
+  }, []);
+
+  useEffect(() => {
+    const countdown = setInterval(() => {
+      if (minutes == 0 && seconds == 0) {
         clearInterval(countdown);
+
         endTest();
+
+        dispatch(setCountdownToNull());
       } else if (
-        (minutes === 0 && seconds === 5) ||
-        (minutes === 0 && seconds === 10) ||
-        (minutes === 0 && seconds === 30) ||
-        (minutes === 1 && seconds === 0) ||
-        (minutes === 2 && seconds === 0) ||
-        (minutes === 5 && seconds === 0)
+        (minutes == 0 && seconds == 5) ||
+        (minutes == 0 && seconds == 10) ||
+        (minutes == 0 && seconds == 30) ||
+        (minutes == 1 && seconds == 0) ||
+        (minutes == 2 && seconds == 0) ||
+        (minutes == 5 && seconds == 0)
       ) {
         error(
           `0${minutes}:${seconds >= 10 ? seconds : '0' + seconds} ${
             minutes >= 1 ? 'minutes' : 'seconds'
           } remaing to end the test.`
         );
-        if (seconds === 0) {
-          setMinutes(minutes - 1);
-          setSeconds(59);
+        if (seconds == 0) {
+          dispatch(setTime({ minutes: minutes - 1, seconds: 59 }));
+
+          localStorage.setItem(
+            testId,
+            JSON.stringify({
+              minutes: minutes - 1,
+              seconds: 59,
+            })
+          );
         } else {
-          setSeconds(seconds - 1);
+          dispatch(setSeconds(seconds - 1));
+
+          localStorage.setItem(
+            testId,
+            JSON.stringify({
+              minutes: minutes,
+              seconds: seconds - 1,
+            })
+          );
         }
-        localStorage.setItem('minutes', minutes.toString());
-        localStorage.setItem('seconds', seconds.toString());
       } else {
-        if (seconds === 0) {
-          setMinutes(minutes - 1);
-          setSeconds(59);
+        if (seconds == 0) {
+          dispatch(setTime({ minutes: minutes - 1, seconds: 59 }));
+
+          localStorage.setItem(
+            testId,
+            JSON.stringify({
+              minutes: minutes - 1,
+              seconds: 59,
+            })
+          );
         } else {
-          setSeconds(seconds - 1);
+          dispatch(setSeconds(seconds - 1));
+
+          localStorage.setItem(
+            testId,
+            JSON.stringify({
+              minutes: minutes,
+              seconds: seconds - 1,
+            })
+          );
         }
-        localStorage.setItem('minutes', minutes.toString());
-        localStorage.setItem('seconds', seconds.toString());
+      }
+
+      if (seconds % 10 == 0 || seconds == 0) {
+        // after every 10 seconds make api call to update remaning time
+        updateRemaningTime();
       }
     }, 1000);
 
+    // clear intervals when unmounting Countdown component
     return () => clearInterval(countdown);
   }, [minutes, seconds]);
 
   const endTest = async () => {
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_NODE_API}/code/end`,
+      await axios.post(
+        `${import.meta.env.VITE_NODE_API}/test/end`,
         {
-          endedAt: document.getElementById('time').innerText,
+          endedAt: `${minutes}:${seconds}`,
+          testId: testId,
         },
         {
           headers: {
@@ -76,14 +176,7 @@ const Countdown = () => {
         }
       );
 
-      localStorage.setItem('minutes', 0);
-      localStorage.setItem('seconds', 0);
-
-      dispatch(setUser({ ...user, submitted: true }));
-      localStorage.setItem(
-        'user',
-        JSON.stringify({ ...user, submitted: true })
-      );
+      localStorage.removeItem(testId);
 
       navigate('/');
     } catch (error) {
@@ -101,7 +194,8 @@ const Countdown = () => {
     >
       &#x1F550;
       <div id="time">
-        {minutes}:{seconds < 10 ? `0${seconds}` : seconds}
+        {minutes < 10 ? `0${minutes}` : minutes}:
+        {seconds < 10 ? `0${seconds}` : seconds}
       </div>
     </div>
   );

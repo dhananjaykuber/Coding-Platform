@@ -1,24 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import getAPIData from '../hooks/getAPIData';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Button from '../components/Button';
 import axios from 'axios';
-import { countdown } from '../components/Countdown';
-import { setUser } from '../redux/userSlice';
+import {
+  setCountdownToNull,
+  setShowTimer,
+  setTestId,
+} from '../redux/countdownSlice';
 
 const Questions = () => {
+  const { id } = useParams();
+
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
 
   const { user } = useSelector((store) => store.user);
+  const { minutes, seconds } = useSelector((store) => store.countdown);
 
   const [questions, setQuestions] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const { data, getLoading, getError } = getAPIData(
-    `${import.meta.env.VITE_NODE_API}/question`,
+    `${import.meta.env.VITE_NODE_API}/question/${id}`,
     {
       headers: {
         Authorization: `Bearer ${user?.token}`,
@@ -32,18 +38,21 @@ const Questions = () => {
     }
 
     if (!getLoading && !getError) {
-      console.log(data);
       setQuestions(data);
+
+      dispatch(setShowTimer(true));
+      dispatch(setTestId(id));
     }
   }, [data, getLoading, getError]);
 
   const handleEndTest = async () => {
     setLoading(true);
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_NODE_API}/code/end`,
+      await axios.post(
+        `${import.meta.env.VITE_NODE_API}/test/end`,
         {
-          endedAt: document.getElementById('time').innerText,
+          endedAt: `${minutes}:${seconds}`,
+          testId: id,
         },
         {
           headers: {
@@ -52,15 +61,9 @@ const Questions = () => {
         }
       );
 
-      clearInterval(countdown);
-      localStorage.setItem('minutes', 0);
-      localStorage.setItem('seconds', 0);
+      localStorage.removeItem(id);
 
-      dispatch(setUser({ ...user, submitted: true }));
-      localStorage.setItem(
-        'user',
-        JSON.stringify({ ...user, submitted: true })
-      );
+      dispatch(setCountdownToNull());
 
       navigate('/');
     } catch (error) {
@@ -96,14 +99,14 @@ const Questions = () => {
               <div className="px-5 w-[100px]">
                 {question.submitted ? (
                   <Link
-                    to={`/question`}
+                    to={`/test/${id}/questions`}
                     className="bg-red-500 text-white text-sm p-2 rounded-md"
                   >
                     Solved
                   </Link>
                 ) : (
                   <Link
-                    to={`/question/${question._id}`}
+                    to={`/test/${id}/questions/${question._id}`}
                     className="bg-green-700 text-white text-sm p-2 rounded-md"
                   >
                     Solve

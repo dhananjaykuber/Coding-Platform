@@ -6,9 +6,12 @@ import { setUser } from '../redux/userSlice';
 import Countdown from './Countdown';
 
 const Navbar = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const dispatch = useDispatch();
+
   const { user } = useSelector((store) => store.user);
+  const { testId, showTimer } = useSelector((store) => store.countdown);
 
   return (
     <div className="flex items-center justify-between border-b p-4">
@@ -34,9 +37,8 @@ const Navbar = () => {
               navigate('/login');
             }}
           />
-          {!user?.submitted && localStorage.getItem('startTest') && (
-            <Countdown />
-          )}
+
+          {showTimer && <Countdown testId={testId} />}
 
           {user?.isAdmin && (
             <Link

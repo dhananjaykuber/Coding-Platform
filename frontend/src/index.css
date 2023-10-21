@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-::-webkit-scrollbar {
+/* ::-webkit-scrollbar {
   width: 2px;
 }
 
@@ -28,4 +28,4 @@
 
 ::-webkit-scrollbar-track:horizontal {
   background-color: #cecece;
-}
+} */

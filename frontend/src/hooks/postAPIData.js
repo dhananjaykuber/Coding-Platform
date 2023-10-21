@@ -8,7 +8,7 @@ const postAPIData = () => {
   const sendData = async (url, headers, dataToSend) => {
     setLoading(true);
     try {
-      const res = await axios.post(url, dataToSend, { headers });
+      const res = await axios.post(url, dataToSend, headers);
 
       return res.data;
     } catch (error) {

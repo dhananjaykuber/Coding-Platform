@@ -1,28 +1,30 @@
 import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import { twMerge } from 'tailwind-merge';
 
 const links = [
   {
     title: 'Add Question',
-    url: '/admin/add-question',
+    url: 'add-question',
   },
   {
     title: 'All Questions',
-    url: '/admin/questions',
+    url: 'questions',
   },
   {
     title: 'Users',
-    url: '/admin/users',
+    url: 'users',
   },
   {
     title: 'Results',
-    url: '/admin/result',
+    url: 'result',
   },
 ];
 
 const Sidebar = ({ children }) => {
+  const { id } = useParams();
+
   const { user } = useSelector((store) => store.user);
 
   const navigate = useNavigate();
@@ -49,7 +51,7 @@ const Sidebar = ({ children }) => {
                 } block p-2 rounded-md`
               )
             }
-            to={link.url}
+            to={`/admin/${id}/${link.url}`}
           >
             {link.title}
           </NavLink>

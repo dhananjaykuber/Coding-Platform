@@ -21,6 +21,8 @@ import AddQuestion from './pages/admin/AddQuestion';
 import Users from './pages/admin/Users';
 import Result from './pages/admin/Result';
 import AdminQuestions from './pages/admin/AdminQuestions';
+import AllTests from './pages/admin/AllTests';
+import Tests from './pages/Tests';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -28,14 +30,17 @@ const router = createBrowserRouter(
       <Route path="" element={<Home />} />
       <Route path="login" element={<Login />} />
       <Route path="signup" element={<Signup />} />
-      <Route path="question" element={<Questions />} />
-      <Route path="question/:id" element={<Question />} />
 
-      <Route path="admin" element={<AddQuestion />} />
-      <Route path="admin/add-question" element={<AddQuestion />} />
-      <Route path="admin/questions" element={<AdminQuestions />} />
-      <Route path="admin/users" element={<Users />} />
-      <Route path="admin/result" element={<Result />} />
+      <Route path="test" element={<Tests />} />
+      <Route path="test/:id/questions" element={<Questions />} />
+      <Route path="test/:testId/questions/:id" element={<Question />} />
+
+      <Route path="admin" element={<AllTests />} />
+      <Route path="admin/:id" element={<Result />} />
+      <Route path="admin/:id/result" element={<Result />} />
+      <Route path="admin/:id/add-question" element={<AddQuestion />} />
+      <Route path="admin/:id/questions" element={<AdminQuestions />} />
+      <Route path="admin/:id/users" element={<Users />} />
 
       <Route path="*" element={<Error />} />
     </Route>
