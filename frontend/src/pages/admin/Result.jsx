@@ -3,15 +3,18 @@ import Sidebar from '../../components/Sidebar';
 import { useDispatch, useSelector } from 'react-redux';
 import getAPIData from '../../hooks/getAPIData';
 import { setResults } from '../../redux/adminSlice';
+import { useParams } from 'react-router-dom';
 
 const Result = () => {
+  const { id } = useParams();
+
   const dispatch = useDispatch();
 
   const { user } = useSelector((store) => store.user);
   const { results } = useSelector((store) => store.admin);
 
   const { data, getLoading, getError } = getAPIData(
-    `${import.meta.env.VITE_NODE_API}/admin/results`,
+    `${import.meta.env.VITE_NODE_API}/admin/results/${id}`,
     {
       headers: {
         Authorization: `Bearer ${user?.token}`,
@@ -31,6 +34,10 @@ const Result = () => {
       <Sidebar>
         {getLoading ? (
           <p>Loading...</p>
+        ) : results?.length <= 0 ? (
+          <p className="text-red-600">
+            No participants have submitted the test so far.
+          </p>
         ) : (
           <div>
             <table className="table-fixed border-collapse border border-slate-300 ">

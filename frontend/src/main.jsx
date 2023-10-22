@@ -40,7 +40,7 @@ const router = createBrowserRouter(
       <Route path="admin/:id/result" element={<Result />} />
       <Route path="admin/:id/add-question" element={<AddQuestion />} />
       <Route path="admin/:id/questions" element={<AdminQuestions />} />
-      <Route path="admin/:id/users" element={<Users />} />
+      <Route path="admin/:id/attendees" element={<Users />} />
 
       <Route path="*" element={<Error />} />
     </Route>

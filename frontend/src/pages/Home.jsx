@@ -22,7 +22,14 @@ const Home = () => {
         natus voluptatem, officiis ducimus vel ea hic quos nisi ipsam culpa vero
         beatae veniam!
       </p>
-      {!user && (
+      {user ? (
+        <Link
+          to="/test"
+          className="bg-green-800 text-white p-2 rounded-md px-5 mt-5 w-fit"
+        >
+          View Tests
+        </Link>
+      ) : (
         <Link
           to="/signup"
           className="bg-gray-800 text-gray-200 p-2 rounded-md px-5 mt-5"
@@ -30,12 +37,6 @@ const Home = () => {
           Signup here
         </Link>
       )}
-      <Link
-        to="/test"
-        className="bg-green-800 text-white p-2 rounded-md px-5 mt-5 w-fit"
-      >
-        View Tests
-      </Link>
     </div>
   );
 };

@@ -13,8 +13,8 @@ const links = [
     url: 'questions',
   },
   {
-    title: 'Users',
-    url: 'users',
+    title: 'Attendees',
+    url: 'attendees',
   },
   {
     title: 'Results',

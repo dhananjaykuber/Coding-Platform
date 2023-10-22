@@ -1,19 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import getAPIData from '../../hooks/getAPIData';
 import { useDispatch, useSelector } from 'react-redux';
-import Button from '../../components/Button';
 import User from '../../components/admin/User';
 import { setAllUsers } from '../../redux/adminSlice';
+import { useParams } from 'react-router-dom';
 
 const Users = () => {
+  const { id } = useParams();
+
   const dispatch = useDispatch();
 
   const { user } = useSelector((store) => store.user);
   const { allUsers } = useSelector((store) => store.admin);
 
   const { data, getLoading, getError } = getAPIData(
-    `${import.meta.env.VITE_NODE_API}/admin/users`,
+    `${import.meta.env.VITE_NODE_API}/admin/users/${id}`,
     {
       headers: {
         Authorization: `Bearer ${user?.token}`,
@@ -32,6 +34,10 @@ const Users = () => {
       <Sidebar>
         {getLoading ? (
           <p>Loading...</p>
+        ) : allUsers?.length <= 0 ? (
+          <p className="text-red-600">
+            No participants have taken the test so far.
+          </p>
         ) : (
           <div>
             <table className="table-fixed border-collapse border border-slate-300 ">

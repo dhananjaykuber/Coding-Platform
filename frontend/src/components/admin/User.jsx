@@ -5,8 +5,11 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { success, error } from '../../utils/toasts';
 import { updateUser } from '../../redux/adminSlice';
+import { useParams } from 'react-router-dom';
 
 const User = ({ item, index }) => {
+  const { id } = useParams();
+
   const dispatch = useDispatch();
 
   const { user } = useSelector((store) => store.user);
@@ -48,7 +51,10 @@ const User = ({ item, index }) => {
     try {
       const res = await axios.put(
         `${import.meta.env.VITE_NODE_API}/admin/reset-test`,
-        { id: item._id },
+        {
+          userId: item._id,
+          testId: id,
+        },
         {
           headers: {
             Authorization: `Bearer ${user.token}`,
