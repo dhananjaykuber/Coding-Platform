@@ -14,13 +14,13 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
-router.get('/users', auth, getUsers);
+router.get('/users/:testId', auth, getUsers);
 router.put('/update-password', auth, editUserPassword);
 
 router.get('/questions', auth, getQuestions);
 router.post('/questions', auth, addQuestion);
 
-router.get('/results', auth, calculateResults);
+router.get('/results/:testId', auth, calculateResults);
 
 router.get('/test', auth, getTests);
 router.post('/test', auth, createTest);

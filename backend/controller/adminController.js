@@ -3,14 +3,40 @@ const Question = require('../models/Question');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const Test = require('../models/Test');
+const TestCompletion = require('../models/TestCompletion');
+const mongoose = require('mongoose');
 
 const getUsers = async (req, res) => {
+  const { testId } = req.params;
+
   try {
     if (!req.user.isAdmin) {
       return res.status(401).json({ error: 'Unauthorized.' });
     }
 
-    const users = await User.find().select('email submitted');
+    const users = await TestCompletion.aggregate([
+      {
+        $match: { test: new mongoose.Types.ObjectId(testId) },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userData',
+        },
+      },
+      {
+        $unwind: '$userData',
+      },
+      {
+        $project: {
+          _id: '$userData._id',
+          email: '$userData.email',
+          submitted: 1,
+        },
+      },
+    ]);
 
     res.status(200).json(users);
   } catch (error) {
@@ -44,24 +70,18 @@ const editUserPassword = async (req, res) => {
 };
 
 const resetTest = async (req, res) => {
-  const { id } = req.body;
+  const { userId, testId } = req.body;
 
   try {
     if (!req.user.isAdmin) {
       return res.status(401).json({ error: 'Unauthorized.' });
     }
 
-    const user = await User.findByIdAndUpdate(id, {
-      $unset: { endedAt: 1 },
-      submitted: false,
-    });
+    await Submission.deleteMany({ testId, author: userId });
 
-    // delete all submissions of users
-    await Submission.deleteMany({ author: id });
+    await TestCompletion.deleteOne({ test: testId, user: userId });
 
-    res
-      .status(200)
-      .json({ message: `${user.email}'s test reseted successfully.` });
+    res.status(200).json({ message: `Test reseted successfully.` });
   } catch (error) {
     res.status(500).json({ error: 'An error occurred while reseting test.' });
   }
@@ -84,12 +104,40 @@ const getQuestions = async (req, res) => {
 };
 
 const calculateResults = async (req, res) => {
+  const { testId } = req.params;
+
   try {
     if (!req.user.isAdmin) {
       return res.status(401).json({ error: 'Unauthorized.' });
     }
 
-    const users = await User.find({ submitted: true });
+    const users = await TestCompletion.aggregate([
+      {
+        $match: {
+          test: new mongoose.Types.ObjectId(testId),
+          submitted: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'userData',
+        },
+      },
+      {
+        $unwind: '$userData',
+      },
+      {
+        $project: {
+          _id: '$userData._id',
+          email: '$userData.email',
+          submitted: 1,
+          endedAt: 1,
+        },
+      },
+    ]);
 
     // create array of promises for each user
     const userPromises = users.map(async (user) => {
@@ -132,14 +180,19 @@ const calculateResults = async (req, res) => {
         ? parseFloat(executionTimeAndRunCount[0].totalExecutionTime).toFixed(3)
         : 0;
 
+      const [min, sec] = user.endedAt.split(':');
+
+      const endedAtMin = min < 10 ? '0' + min : min;
+      const endedAtSec = sec < 10 ? '0' + sec : sec;
+
       return {
         email: user.email,
         submitted: user.submitted,
         totalSolved: totalSolved,
-        totalPassedTests: totalPassedTests,
+        totalPassedTests: parseFloat(totalPassedTests).toFixed(2),
         totalExecutionTime: parseFloat(totalExecutionTime),
         totalRunCount: totalRunCount,
-        endedAt: user.endedAt,
+        endedAt: `${endedAtMin}:${endedAtSec}`,
       };
     });
 
