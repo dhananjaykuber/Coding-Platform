@@ -30,7 +30,8 @@ const AllTests = () => {
     if (!user) {
       navigate('/');
     }
-    if (!user?.isAdmin) {
+
+    if (user.type !== 'admin' && user.type !== 'superadmin') {
       navigate('/');
     }
 

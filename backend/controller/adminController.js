@@ -10,10 +10,6 @@ const getUsers = async (req, res) => {
   const { testId } = req.params;
 
   try {
-    if (!req.user.isAdmin) {
-      return res.status(401).json({ error: 'Unauthorized.' });
-    }
-
     const users = await TestCompletion.aggregate([
       {
         $match: { test: new mongoose.Types.ObjectId(testId) },
@@ -50,10 +46,6 @@ const editUserPassword = async (req, res) => {
   const { id, password } = req.body;
 
   try {
-    if (!req.user.isAdmin) {
-      return res.status(401).json({ error: 'Unauthorized.' });
-    }
-
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -73,10 +65,6 @@ const resetTest = async (req, res) => {
   const { userId, testId } = req.body;
 
   try {
-    if (!req.user.isAdmin) {
-      return res.status(401).json({ error: 'Unauthorized.' });
-    }
-
     await Submission.deleteMany({ testId, author: userId });
 
     await TestCompletion.deleteOne({ test: testId, user: userId });
@@ -89,10 +77,6 @@ const resetTest = async (req, res) => {
 
 const getQuestions = async (req, res) => {
   try {
-    if (!req.user.isAdmin) {
-      return res.status(401).json({ error: 'Unauthorized.' });
-    }
-
     const questions = await Question.find();
 
     res.status(200).json(questions);
@@ -107,10 +91,6 @@ const calculateResults = async (req, res) => {
   const { testId } = req.params;
 
   try {
-    if (!req.user.isAdmin) {
-      return res.status(401).json({ error: 'Unauthorized.' });
-    }
-
     const users = await TestCompletion.aggregate([
       {
         $match: {
@@ -235,10 +215,6 @@ const createTest = async (req, res) => {
   const { title, description, time } = req.body;
 
   try {
-    if (!req.user.isAdmin) {
-      return res.status(401).json({ error: 'Unauthorized.' });
-    }
-
     const test = await Test.create({
       title,
       description,
@@ -248,16 +224,13 @@ const createTest = async (req, res) => {
 
     res.status(200).json(test);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: 'An error occurred while creating test.' });
   }
 };
 
 const getTests = async (req, res) => {
   try {
-    if (!req.user.isAdmin) {
-      return res.status(401).json({ error: 'Unauthorized.' });
-    }
-
     const tests = await Test.find({ creator: req.user._id });
 
     res.status(200).json(tests);
@@ -270,10 +243,6 @@ const updateTest = async (req, res) => {
   const { id } = req.params;
 
   try {
-    if (!req.user.isAdmin) {
-      return res.status(401).json({ error: 'Unauthorized.' });
-    }
-
     const test = await Test.findByIdAndUpdate(id, { ...req.body });
 
     res.status(200).json(test);
@@ -286,10 +255,6 @@ const addQuestion = async (req, res) => {
   const { number, title, description, template, testCases, testId } = req.body;
 
   try {
-    if (!req.user.isAdmin) {
-      return res.status(401).json({ error: 'Unauthorized.' });
-    }
-
     const question = await Question.create({
       number,
       title,

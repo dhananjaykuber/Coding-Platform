@@ -29,9 +29,6 @@ const Tests = () => {
     if (!user) {
       navigate('/');
     }
-    if (!user?.isAdmin) {
-      navigate('/');
-    }
 
     if (!getLoading && !getError) {
       console.log(data);
@@ -48,6 +45,8 @@ const Tests = () => {
       <div className="mt-5 flex flex-wrap gap-3">
         {getLoading ? (
           <p>Loading...</p>
+        ) : tests?.length <= 0 ? (
+          <p className="text-red-600">No tests found</p>
         ) : (
           tests && tests.map((test) => <Test key={test._id} test={test} />)
         )}

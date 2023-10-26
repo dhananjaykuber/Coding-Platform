@@ -33,7 +33,7 @@ const Sidebar = ({ children }) => {
     if (!user) {
       navigate('/');
     }
-    if (!user.isAdmin) {
+    if (user.type !== 'admin' && user.type !== 'superadmin') {
       navigate('/');
     }
   }, [user]);

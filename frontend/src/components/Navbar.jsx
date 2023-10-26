@@ -40,7 +40,7 @@ const Navbar = () => {
 
           {showTimer && <Countdown testId={testId} />}
 
-          {user?.isAdmin && (
+          {user?.type === 'admin' && (
             <Link
               to="/admin"
               className="bg-gray-800 text-gray-200 p-2 rounded-md px-5 ml-0"
